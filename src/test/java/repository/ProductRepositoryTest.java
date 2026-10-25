@@ -70,11 +70,18 @@ class ProductRepositoryTest {
 
     @Test
     void shouldRejectDuplicateId() {
+        Product anotherMouse = new Product(
+                1L,
+                "Another Mouse",
+                new BigDecimal("250"),
+                10
+        );
+
         repository.save(mouse);
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> repository.save(mouse)
+                () -> repository.save(anotherMouse)
         );
 
         assertSame(mouse, repository.findById(1L));
@@ -89,7 +96,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void shouldReturnAllProducts(){
+    void shouldReturnAllProducts() {
         Product saved1 = new Product(
                 1L,
                 "Mouse",
@@ -117,29 +124,14 @@ class ProductRepositoryTest {
 
         List<Product> found = repository.findAll();
 
-        for (Product product : found) {
-            if (product.getId().equals(1L)) {
-                assertSame(saved1, product);
-            }
-        }
-
-        for (Product product : found) {
-            if (product.getId().equals(2L)) {
-                assertSame(saved2, product);
-            }
-        }
-
-        for (Product product : found) {
-            if (product.getId().equals(3L)) {
-                assertSame(saved3, product);
-            }
-        }
-
+        assertTrue(found.contains(saved1));
+        assertTrue(found.contains(saved2));
+        assertTrue(found.contains(saved3));
         assertEquals(3, found.size());
     }
 
     @Test
-    void shouldReturnEmptyListWhenRepositoryIsEmpty(){
+    void shouldReturnEmptyListWhenRepositoryIsEmpty() {
         List<Product> found = repository.findAll();
 
         assertEquals(0, found.size());
@@ -147,7 +139,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void shouldReturnIndependentList(){
+    void shouldReturnIndependentList() {
         repository.save(mouse);
 
         List<Product> found = repository.findAll();
@@ -160,7 +152,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void shouldReturnReferencesToStoredProducts(){
+    void shouldReturnReferencesToStoredProducts() {
         repository.save(mouse);
 
         List<Product> found = repository.findAll();
@@ -172,12 +164,15 @@ class ProductRepositoryTest {
         }
 
         Product byId = repository.findById(1L);
-
-        assertEquals(mouse.getPrice(), byId.getPrice());
+        assertEquals(
+                new BigDecimal("200"),
+                byId.getPrice()
+        );
+        assertSame(mouse, byId);
     }
 
     @Test
-    void shouldCheckProductExistence(){
+    void shouldCheckProductExistence() {
         repository.save(mouse);
 
         assertTrue(repository.existsById(1L));
