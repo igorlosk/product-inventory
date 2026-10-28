@@ -94,4 +94,35 @@ class ProductServiceMockTest {
         assertTrue(actualProducts.contains(keyboard));
         verify(repository).findAll();
     }
+
+    @Test
+    void shouldCallFindByIdTwice(){
+        when(repository.findById(1L)).thenReturn(mouse);
+        service.getProduct(1L);
+        service.getProduct(1L);
+        verify(repository,  times(2)).findById(1L);
+    }
+
+    @Test
+    void shouldNotSaveProductWhenReading(){
+        when(repository.findById(1L)).thenReturn(mouse);
+        service.getProduct(1L);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void shouldSaveAnyProduct(){
+        service.addProduct(mouse);
+        verify(repository).save(any(Product.class));
+        verify(repository).save(mouse);
+    }
+
+    @Test
+    void shouldFindProductWithExactId(){
+        when(repository.findById(1L)).thenReturn(mouse);
+        service.getProduct(1L);
+        verify(repository).findById(eq(1L));
+    }
+
+
 }
