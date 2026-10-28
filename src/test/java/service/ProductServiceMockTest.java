@@ -2,6 +2,7 @@ package service;
 
 import model.Product;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -124,5 +125,45 @@ class ProductServiceMockTest {
         verify(repository).findById(eq(1L));
     }
 
+    @Test
+    void shouldCaptureSavedProduct(){
+        service.addProduct(mouse);
+        ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
+        verify(repository).save(captor.capture());
 
+        Product captured = captor.getValue();
+
+        assertSame(mouse, captured);
+        assertEquals(1L, captured.getId());
+        assertEquals("Mouse", captured.getName());
+        assertEquals(new BigDecimal("100"), captured.getPrice());
+        assertEquals(5,  captured.getQuantity());
+
+    }
+
+    @Test
+    void shouldCaptureTwoSavedProducts(){
+        Product keyboard = new Product(
+                2L,
+                "Keyboard",
+                new BigDecimal("200"),
+                3
+        );
+        service.addProduct(mouse);
+        service.addProduct(keyboard);
+        ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
+        verify(repository, times(2)).save(captor.capture());
+        List<Product> capturedProducts = captor.getAllValues();
+        assertEquals(2, capturedProducts.size());
+        assertEquals(1L, capturedProducts.get(0).getId());
+        assertEquals(2L, capturedProducts.get(1).getId());
+    }
+
+    @Test
+    void shouldCaptureExactProductReference(){
+        service.addProduct(mouse);
+        ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
+        verify(repository).save(captor.capture());
+        assertSame(mouse, captor.getValue());
+    }
 }
