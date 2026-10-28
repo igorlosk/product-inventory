@@ -1,27 +1,33 @@
 package service;
 
 import model.Product;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ProductServiceMockTest {
 
+    @Mock
     private ProductRepository repository;
+
+    @InjectMocks
     private ProductService service;
+
     private Product mouse;
 
     @BeforeEach
     void setUp() {
-        repository = mock(ProductRepository.class);
-        service = new ProductService(repository);
 
         mouse = new Product(
                 1L,
@@ -83,7 +89,7 @@ class ProductServiceMockTest {
 
         List<Product> actualProducts = service.getAllProducts();
 
-        assertEquals(2, expectedProducts.size());
+        assertEquals(2, actualProducts.size());
         assertTrue(actualProducts.contains(mouse));
         assertTrue(actualProducts.contains(keyboard));
         verify(repository).findAll();
