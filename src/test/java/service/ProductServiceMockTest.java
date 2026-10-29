@@ -97,36 +97,36 @@ class ProductServiceMockTest {
     }
 
     @Test
-    void shouldCallFindByIdTwice(){
+    void shouldCallFindByIdTwice() {
         when(repository.findById(1L)).thenReturn(mouse);
         service.getProduct(1L);
         service.getProduct(1L);
-        verify(repository,  times(2)).findById(1L);
+        verify(repository, times(2)).findById(1L);
     }
 
     @Test
-    void shouldNotSaveProductWhenReading(){
+    void shouldNotSaveProductWhenReading() {
         when(repository.findById(1L)).thenReturn(mouse);
         service.getProduct(1L);
         verify(repository, never()).save(any());
     }
 
     @Test
-    void shouldSaveAnyProduct(){
+    void shouldSaveAnyProduct() {
         service.addProduct(mouse);
         verify(repository).save(any(Product.class));
         verify(repository).save(mouse);
     }
 
     @Test
-    void shouldFindProductWithExactId(){
+    void shouldFindProductWithExactId() {
         when(repository.findById(1L)).thenReturn(mouse);
         service.getProduct(1L);
         verify(repository).findById(eq(1L));
     }
 
     @Test
-    void shouldCaptureSavedProduct(){
+    void shouldCaptureSavedProduct() {
         service.addProduct(mouse);
         ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
         verify(repository).save(captor.capture());
@@ -137,12 +137,12 @@ class ProductServiceMockTest {
         assertEquals(1L, captured.getId());
         assertEquals("Mouse", captured.getName());
         assertEquals(new BigDecimal("100"), captured.getPrice());
-        assertEquals(5,  captured.getQuantity());
+        assertEquals(5, captured.getQuantity());
 
     }
 
     @Test
-    void shouldCaptureTwoSavedProducts(){
+    void shouldCaptureTwoSavedProducts() {
         Product keyboard = new Product(
                 2L,
                 "Keyboard",
@@ -160,10 +160,50 @@ class ProductServiceMockTest {
     }
 
     @Test
-    void shouldCaptureExactProductReference(){
+    void shouldCaptureExactProductReference() {
         service.addProduct(mouse);
         ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
         verify(repository).save(captor.capture());
         assertSame(mouse, captor.getValue());
+    }
+
+    @Test
+    void shouldPropagateRepositoryException() {
+
+        // Arrange — настраиваем mock
+        doThrow(new IllegalArgumentException("Duplicate product"))
+                .when(repository)
+                .save(mouse);
+
+        // Act + Assert — ожидаем исключение
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.addProduct(mouse)
+        );
+
+        // Проверяем сообщение исключения
+        assertEquals("Duplicate product", exception.getMessage());
+
+        // Проверяем обращение к репозиторию
+        verify(repository, times(1)).save(mouse);
+    }
+
+    @Test
+    void shouldNotChangePriceWhenProductMissing() {
+        // Arrange
+        when(repository.findById(99L)).thenReturn(null);
+
+        // Act + Assert
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updatePrice(99L, new BigDecimal("250"))
+        );
+
+        assertEquals(
+                new BigDecimal("100"),
+                mouse.getPrice()
+        );
+
+        verify(repository).findById(99L);
     }
 }
