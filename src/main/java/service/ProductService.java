@@ -62,4 +62,37 @@ public class ProductService {
 
         return total;
     }
+
+    public void processOrder(
+            Long firstProductId,
+            int firstAmount,
+            Long secondProductId,
+            int secondAmount
+    ) {
+        if (firstProductId == null || secondProductId == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+
+        if (firstProductId.equals(secondProductId)) {
+            throw new IllegalArgumentException("ProductId are the same");
+        }
+
+        if (firstAmount <= 0 || secondAmount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+
+        Product firstProduct = repository.findById(firstProductId);
+        Product secondProduct = repository.findById(secondProductId);
+
+        if (firstProduct == null || secondProduct == null) {
+            throw new IllegalArgumentException("Product does not exist");
+        }
+
+        if (firstProduct.getQuantity() < firstAmount || secondProduct.getQuantity() < secondAmount) {
+            throw new IllegalArgumentException("Not enough products in stock");
+        }
+
+        firstProduct.reduceQuantity(firstAmount);
+        secondProduct.reduceQuantity(secondAmount);
+    }
 }

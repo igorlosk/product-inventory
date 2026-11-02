@@ -14,7 +14,7 @@ public class Product {
             throw new IllegalArgumentException("Input values can't be null");
         }
 
-        if (id <= 0 || name.isBlank() || price.compareTo(BigDecimal.ZERO) < 0  || quantity < 0) {
+        if (id <= 0 || name.isBlank() || price.compareTo(BigDecimal.ZERO) < 0 || quantity < 0) {
             throw new IllegalArgumentException("input values can't be negative");
         }
         this.id = id;
@@ -34,22 +34,27 @@ public class Product {
         price = newPrice;
     }
 
-    public void addQuantity (int addToStock) {
+    public void addQuantity(int addToStock) {
         if (addToStock <= 0) {
             throw new IllegalArgumentException("AddQuantity must be greater than 0");
         }
         quantity = Math.addExact(quantity, addToStock);
     }
 
-    public void reduceQuantity (int reduce) {
-        if (reduce <= 0) {
-            throw new IllegalArgumentException("Reduce must be positive");
+    public void reduceQuantity(int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException(
+                    "Amount must be positive"
+            );
         }
 
-        if (reduce > quantity) {
-            throw new IllegalArgumentException("Not enough products in stock");
+        if (amount > quantity) {
+            throw new IllegalArgumentException(
+                    "Not enough products in stock"
+            );
         }
-        quantity = quantity - reduce;
+
+        quantity -= amount;
     }
 
     public Long getId() {

@@ -168,4 +168,187 @@ class ProductServiceTest {
     void shouldReturnZeroInventoryValueWhenEmpty() {
         assertEquals(0, BigDecimal.ZERO.compareTo(service.calculateInventoryValue()));
     }
+
+    @Test
+    void shouldCalculateInventoryValueAfterStockChanges() {
+        Product keyboard = new Product(
+                2L,
+                "Keyboard",
+                new BigDecimal("200"),
+                3
+        );
+        service.addProduct(mouse);
+        service.addProduct(keyboard);
+
+        service.restock(1L, 3);
+        service.reduceStock(2L, 2);
+        service.updatePrice(mouse.getId(), new BigDecimal("150"));
+
+        Product updatedMouse = service.getProduct(1L);
+        Product updatedKeyboard = service.getProduct(2L);
+
+        assertEquals(8, updatedMouse.getQuantity());
+        assertEquals(1, updatedKeyboard.getQuantity());
+        assertEquals(new BigDecimal("150"), updatedMouse.getPrice());
+        assertEquals(new BigDecimal("1400"), service.calculateInventoryValue());
+    }
+
+    @Test
+    void shouldKeepInventoryUnchangedAfterFailedReduction() {
+        Product keyboard = new Product(
+                2L,
+                "Keyboard",
+                new BigDecimal("200"),
+                3
+        );
+        service.addProduct(mouse);
+        service.addProduct(keyboard);
+        Product updatedMouse = service.getProduct(1L);
+
+        BigDecimal inventoryValueBefore = service.calculateInventoryValue();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.reduceStock(updatedMouse.getId(), 10));
+
+        BigDecimal inventoryValueAfter = service.calculateInventoryValue();
+
+        assertEquals(5, updatedMouse.getQuantity());
+        assertEquals(inventoryValueBefore, inventoryValueAfter);
+
+    }
+
+    @Test
+    void shouldProcessOrderSuccessfully(){
+        Product saved1 = new Product(
+                1L,
+                "Mouse",
+                new BigDecimal("100"),
+                10
+        );
+
+        Product saved2 = new Product(
+                2L,
+                "Keyboard",
+                new BigDecimal("200"),
+                5
+        );
+
+        service.addProduct(saved1);
+        service.addProduct(saved2);
+
+        service.processOrder(saved1.getId(), 3, saved2.getId(),2);
+
+        Product updatedMouse = service.getProduct(1L);
+        Product updatedKeyboard = service.getProduct(2L);
+
+        assertEquals(7, updatedMouse.getQuantity());
+        assertEquals(3, updatedKeyboard.getQuantity());
+
+    }
+
+    @Test
+    void shouldKeepStockUnchangedWhenOrderFails(){
+        Product saved1 = new Product(
+                1L,
+                "Mouse",
+                new BigDecimal("100"),
+                10
+        );
+
+        Product saved2 = new Product(
+                2L,
+                "Keyboard",
+                new BigDecimal("200"),
+                2
+        );
+
+        service.addProduct(saved1);
+        service.addProduct(saved2);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.processOrder(saved1.getId(), 3, saved2.getId(),5));
+        Product updatedMouse = service.getProduct(1L);
+        Product updatedKeyboard = service.getProduct(2L);
+        assertEquals(10, updatedMouse.getQuantity());
+        assertEquals(2, updatedKeyboard.getQuantity());
+    }
+
+    @Test
+    void shouldRejectOrderWithZeroQuantity(){
+        Product saved1 = new Product(
+                1L,
+                "Mouse",
+                new BigDecimal("100"),
+                10
+        );
+
+        Product saved2 = new Product(
+                2L,
+                "Keyboard",
+                new BigDecimal("200"),
+                10
+        );
+
+        service.addProduct(saved1);
+        service.addProduct(saved2);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.processOrder(saved1.getId(), 3, saved2.getId(),0));
+
+        Product updatedMouse = service.getProduct(1L);
+        Product updatedKeyboard = service.getProduct(2L);
+        assertEquals(10, updatedMouse.getQuantity());
+        assertEquals(10, updatedKeyboard.getQuantity());
+
+    }
+
+    @Test
+    void shouldRejectOrderWhenProductMissing(){
+        service.addProduct(mouse);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.processOrder(mouse.getId(), 3, 99L,5));
+
+        Product savedMouse = service.getProduct(1L);
+
+        assertEquals(5, savedMouse.getQuantity());
+
+    }
+    @Test
+    void shouldRejectOrderWithSameProductId(){
+        service.addProduct(mouse);
+        Product keyboard = new Product(
+                1L,
+                "Keyboard",
+                new BigDecimal("200"),
+                3
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.processOrder(mouse.getId(), 3, keyboard.getId(),5));
+
+        Product savedMouse = service.getProduct(1L);
+        assertEquals(5, savedMouse.getQuantity());
+    }
+
+    @Test
+    void shouldRejectOrderWithNullProductId(){
+        service.addProduct(mouse);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.processOrder(null,3, mouse.getId(),2));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.processOrder(mouse.getId(),2,null,2));
+
+        Product savedMouse = service.getProduct(1L);
+        assertEquals(5, savedMouse.getQuantity());
+    }
 }

@@ -72,6 +72,33 @@ public class Main {
                         ", количество: " + element.getQuantity()));
         System.out.println("Общая стоимость склада: " + service.calculateInventoryValue());
 
-
+//        System.out.println("Тест № 1 — успешный заказ");
+//        Product testMouse1 = new Product(4L, "Mouse", new BigDecimal("2"), 10);
+//        Product testKeyboard1 = new Product(5L, "Keyboard", new BigDecimal("15"), 5);
+//        service.addProduct(testMouse1);
+//        service.addProduct(testKeyboard1);
+//        System.out.println("Исходное состояние: " + "Mouse: "
+//                + testMouse1.getQuantity() + ", " + "Keyboard: " + testKeyboard1.getQuantity());
+//        service.processOrder(testMouse1.getId(), 3, testKeyboard1.getId(), 2);
+//        System.out.println("Ожидаемый результат: " + "Mouse: "
+//                + testMouse1.getQuantity() + ", " + "Keyboard: " + testKeyboard1.getQuantity());
+//        System.out.println("-".repeat(50));
+//
+//        System.out.println("Тест № 2 — неудачный заказ");
+//        Product testMouse2 = new Product(6L, "Mouse", new BigDecimal("2"), 10);
+//        Product testKeyboard2 = new Product(7L, "Keyboard", new BigDecimal("15"), 2);
+//        service.addProduct(testMouse2);
+//        service.addProduct(testKeyboard2);
+//        System.out.println("Исходное состояние: " + "Mouse: "
+//                + testMouse2.getQuantity() + ", " + "Keyboard: " + testKeyboard2.getQuantity());
+//        try {
+//            service.processOrder(testMouse2.getId(), 3, testKeyboard2.getId(), 5);
+//        } catch (IllegalArgumentException e) {
+//            System.out.println("Expected error: " + e.getMessage());
+//        }
+//
+//        System.out.println("Ожидаемый результат: " + "Mouse: "
+//                + testMouse2.getQuantity() + ", " + "Keyboard: " + testKeyboard2.getQuantity());
+//
     }
 }
