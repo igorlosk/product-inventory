@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -215,5 +216,68 @@ class ProductUtilsTest {
         assertEquals(original, products);
         assertNotSame(products, filtered);
         assertEquals(new BigDecimal("2"), mouse.getPrice());
+    }
+
+    @Test
+    void shouldIncreaseStockAndThenPrintProducts() {
+        products.add(mouse);
+        products.add(keyboard);
+        products.add(monitor);
+
+        Consumer<Product> increaseStock =
+                product -> product.addQuantity(2);
+
+        Consumer<Product> printProduct =
+                product -> System.out.println(
+                        product.getName() + " " + product.getQuantity()
+                );
+
+        Consumer<Product> combined =
+                increaseStock.andThen(printProduct);
+
+        productUtils.processProducts(products, combined);
+
+        assertEquals(7, mouse.getQuantity());
+        assertEquals(2, keyboard.getQuantity());
+        assertEquals(4, monitor.getQuantity());
+
+    }
+
+    @Test
+    void shouldExecuteConsumersInCorrectOrder() {
+        products.add(mouse);
+
+        List<String> events = new ArrayList<>();
+
+        Consumer<Product> first = product ->
+                events.add("first");
+
+        Consumer<Product> second = product ->
+                events.add("second");
+
+        Consumer<Product> combined = first.andThen(second);
+
+        productUtils.processProducts(products, combined);
+        assertEquals(List.of("first", "second"), events);
+    }
+
+    @Test
+    void shouldSkipSecondConsumerWhenFirstThrows() {
+        products.add(mouse);
+
+        List<String> events = new ArrayList<>();
+
+        Consumer<Product> first = product -> product.reduceQuantity(10);
+
+        Consumer<Product> second = product ->
+                events.add("second");
+
+        Consumer<Product> combined = first.andThen(second);
+
+        assertThrows(
+                IllegalArgumentException.class, () ->
+                        productUtils.processProducts(products, combined));
+
+        assertTrue(events.isEmpty());
     }
 }

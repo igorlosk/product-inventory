@@ -4,6 +4,7 @@ import model.Product;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class ProductUtils {
@@ -137,6 +138,15 @@ public class ProductUtils {
             }
         }
         return filteredProducts;
+    }
+
+    public void processProducts(
+            List<Product> products,
+            Consumer<Product> action
+    ) {
+        for (Product product : products) {
+            action.accept(product);
+        }
     }
 }
 
