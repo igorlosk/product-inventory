@@ -3,10 +3,8 @@ package service;
 import model.Product;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class ProductUtils {
 
@@ -126,6 +124,19 @@ public class ProductUtils {
         };
 
         products.sort(comparator);
+    }
+
+    public static List<Product> filterProducts(
+            List<Product> products,
+            Predicate<Product> condition
+    ) {
+        List<Product> filteredProducts = new ArrayList<>();
+        for (Product product : products) {
+            if (condition.test(product)) {
+                filteredProducts.add(product);
+            }
+        }
+        return filteredProducts;
     }
 }
 
