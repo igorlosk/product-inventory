@@ -3,6 +3,7 @@ package service;
 import model.Product;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -55,4 +56,77 @@ public class ProductUtils {
             }
         }
     }
+
+    public static void sortProductsByPrice(List<Product> products) {
+        Comparator<Product> comparator = new Comparator<Product>() {
+            @Override
+            public int compare(Product o1, Product o2) {
+                return o1.getPrice().compareTo(o2.getPrice());
+            }
+        };
+
+        products.sort(comparator);
+    }
+
+    public static void sortProductsByPriceAndName(List<Product> products) {
+
+        Comparator<Product> comparator = new Comparator<Product>() {
+            @Override
+            public int compare(Product o1, Product o2) {
+                int priceComparison =
+                        o1.getPrice().compareTo(o2.getPrice());
+
+                if (priceComparison != 0) {
+                    return priceComparison;
+                }
+
+                return o1.getName().compareTo(o2.getName());
+            }
+        };
+        products.sort(comparator);
+    }
+
+    public static void sortByName(List<Product> products) {
+        Comparator<Product> comparator = Comparator.comparing(Product::getName);
+        products.sort(comparator);
+    }
+
+    public static void sortByPriceDescending(List<Product> products) {
+        Comparator<Product> comparator = Comparator.comparing(Product::getPrice).reversed();
+        products.sort(comparator);
+    }
+
+    public static void sortByQuantityAndPrice(List<Product> products) {
+        Comparator<Product> comparator = Comparator.comparingInt(
+                Product::getQuantity).reversed().thenComparing(Product::getPrice);
+        products.sort(comparator);
+    }
+
+    public static void sortByPriceLambda(List<Product> products) {
+        Comparator<Product> comparator = (p1, p2) -> p1.getPrice().compareTo(p2.getPrice());
+        products.sort(comparator);
+    }
+
+    public static void sortByNameLength(List<Product> products) {
+        Comparator<Product> comparator = (p1, p2) ->
+                Integer.compare(
+                        p1.getName().length(),
+                        p2.getName().length());
+        products.sort(comparator);
+    }
+
+    public static void sortByPriceAndNameLambda(List<Product> products) {
+        Comparator<Product> comparator = (p1, p2) -> {
+            int priceComparison =
+                    p1.getPrice().compareTo(p2.getPrice());
+            if (priceComparison != 0) {
+                return priceComparison;
+            }
+            return p1.getName().compareTo(p2.getName());
+        };
+
+        products.sort(comparator);
+    }
 }
+
+
