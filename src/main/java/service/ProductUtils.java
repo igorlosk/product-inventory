@@ -126,7 +126,7 @@ public class ProductUtils {
         products.sort(comparator);
     }
 
-    public static List<Product> filterProducts(
+    public List<Product> filterProducts(
             List<Product> products,
             Predicate<Product> condition
     ) {

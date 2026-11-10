@@ -34,14 +34,14 @@ public class Test {
                 product.getPrice().compareTo(new BigDecimal("200")) > 0;
         Predicate<Product> letterM = product -> product.getName().startsWith("M");
 
-        System.out.println("Existing products are:");
-        ProductUtils.filterProducts(products, quantityFilter).forEach(System.out::println);
-
-        System.out.println("\nExisting products filtering by price over 200:");
-        ProductUtils.filterProducts(products, priceFilter.and(quantityFilter)).forEach(System.out::println);
-
-        System.out.println("\nProducts starring M letter:");
-        ProductUtils.filterProducts(products, letterM).forEach(System.out::println);
+//        System.out.println("Existing products are:");
+//        ProductUtils.filterProducts(products, quantityFilter).forEach(System.out::println);
+//
+//        System.out.println("\nExisting products filtering by price over 200:");
+//        ProductUtils.filterProducts(products, priceFilter.and(quantityFilter)).forEach(System.out::println);
+//
+//        System.out.println("\nProducts starring M letter:");
+//        ProductUtils.filterProducts(products, letterM).forEach(System.out::println);
 
     }
 }

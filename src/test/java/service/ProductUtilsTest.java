@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -95,7 +96,7 @@ class ProductUtilsTest {
     }
 
     @Test
-    void shouldKeepEmptyListEmpty(){
+    void shouldKeepEmptyListEmpty() {
 
         productUtils.removeOutOfStockProducts(products);
 
@@ -105,7 +106,7 @@ class ProductUtilsTest {
     }
 
     @Test
-    void shouldAddReplacementAfterOutOfStockProduct(){
+    void shouldAddReplacementAfterOutOfStockProduct() {
         products.add(mouse);
         products.add(keyboard);
 
@@ -119,7 +120,7 @@ class ProductUtilsTest {
     }
 
     @Test
-    void shouldAddReplacementsForConsecutiveOutOfStockProducts(){
+    void shouldAddReplacementsForConsecutiveOutOfStockProducts() {
         products.add(keyboard);
         products.add(laptop);
 
@@ -139,7 +140,7 @@ class ProductUtilsTest {
     }
 
     @Test
-    void shouldNotAddReplacementsWhenAllProductsInStock(){
+    void shouldNotAddReplacementsWhenAllProductsInStock() {
         products.add(mouse);
         products.add(monitor);
 
@@ -149,5 +150,70 @@ class ProductUtilsTest {
 
         assertSame(mouse, products.get(0));
         assertSame(monitor, products.get(1));
+    }
+
+    @Test
+    void shouldFilterProductsByPositiveStock() {
+        products.add(mouse);
+        products.add(keyboard);
+        products.add(monitor);
+        products.add(laptop);
+
+        Predicate<Product> positiveStock = product -> product.getQuantity() > 0;
+        List<Product> sortedList = productUtils.filterProducts(products, positiveStock);
+
+        assertEquals(2, sortedList.size());
+        assertSame(mouse, sortedList.get(0));
+        assertSame(monitor, sortedList.get(1));
+    }
+
+    @Test
+    void shouldFilterProductsByPriceAndStock() {
+        products.add(mouse);
+        products.add(keyboard);
+        products.add(monitor);
+        products.add(laptop);
+
+        Predicate<Product> positiveStock = product ->
+                product.getQuantity() > 0;
+        Predicate<Product> priceFilter = product ->
+                product.getPrice().compareTo(new BigDecimal("100")) > 0;
+
+        List<Product> sortedList = productUtils.filterProducts(products, positiveStock.and(priceFilter));
+        assertEquals(1, sortedList.size());
+        assertEquals(new BigDecimal("120"), sortedList.getFirst().getPrice());
+        assertEquals(2, sortedList.getFirst().getQuantity());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoProductsMatch() {
+        products.add(mouse);
+        products.add(keyboard);
+        products.add(monitor);
+        products.add(laptop);
+
+        Predicate<Product> positiveStock = product ->
+                product.getQuantity() > 0;
+        Predicate<Product> priceFilter = product ->
+                product.getPrice().compareTo(new BigDecimal("200")) > 0;
+
+        List<Product> sortedList = productUtils.filterProducts(products, positiveStock.and(priceFilter));
+
+        assertEquals(0, sortedList.size());
+    }
+
+    @Test
+    void shouldNotModifyOriginalListAfterFiltering() {
+        products.add(mouse);
+        products.add(keyboard);
+        products.add(monitor);
+        products.add(laptop);
+
+        List<Product> original = new ArrayList<>(products);
+        List<Product> filtered = productUtils.filterProducts(products, p -> p.getQuantity() > 0);
+
+        assertEquals(original, products);
+        assertNotSame(products, filtered);
+        assertEquals(new BigDecimal("2"), mouse.getPrice());
     }
 }
