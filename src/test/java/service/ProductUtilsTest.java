@@ -279,5 +279,6 @@ class ProductUtilsTest {
                         productUtils.processProducts(products, combined));
 
         assertTrue(events.isEmpty());
+        assertEquals(5, mouse.getQuantity());
     }
 }
