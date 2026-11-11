@@ -5,6 +5,7 @@ import model.Product;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ProductUtils {
@@ -147,6 +148,18 @@ public class ProductUtils {
         for (Product product : products) {
             action.accept(product);
         }
+    }
+
+    public <R> List<R> transformProducts(
+            List<Product> products,
+            Function<Product, R> mapper
+    ) {
+        List<R> results = new ArrayList<>();
+        for (Product product : products) {
+            R result = mapper.apply(product);
+            results.add(result);
+        }
+        return results;
     }
 }
 

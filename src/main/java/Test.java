@@ -4,7 +4,6 @@ import service.ProductUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class Test {
     public static void main(String[] args) {
@@ -22,18 +21,15 @@ public class Test {
         products.add(mouse);
         products.add(keyboard);
         products.add(monitor);
+        products.add(laptop);
+        products.add(headphones);
+        products.add(adapter);
+        products.add(cable);
+        products.add(webcam);
 
         ProductUtils productUtils = new ProductUtils();
 
-        Consumer<Product> increaseStock = product -> {
-            product.addQuantity(2);
-        };
+        
 
-        Consumer<Product> printProduct = product -> {
-            System.out.println(product.getName() + " " + product.getQuantity());
-        };
-
-        Consumer<Product> combined = increaseStock.andThen(printProduct);
-        productUtils.processProducts(products, combined);
     }
 }
