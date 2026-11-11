@@ -5,9 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -280,5 +282,61 @@ class ProductUtilsTest {
 
         assertTrue(events.isEmpty());
         assertEquals(5, mouse.getQuantity());
+    }
+
+    @Test
+    void shouldApplyDiscountAndFormatPrice() {
+        Product saved1 = new Product(
+                1L,
+                "Mouse",
+                new BigDecimal("100"),
+                0
+        );
+
+        products.add(saved1);
+
+        BigDecimal multiplier = new BigDecimal("0.90");
+        Function<Product, BigDecimal> applyDiscount = product ->
+                product.getPrice().multiply(multiplier);
+
+        Function<BigDecimal, String> formatPrice = price ->
+                price.setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString() + " RUB";
+
+        Function<Product, String> pipeline = applyDiscount.andThen(formatPrice);
+        List<String> result = productUtils.transformProducts(products, pipeline);
+
+        assertEquals(List.of("90.00 RUB"), result);
+        assertEquals(new BigDecimal("100"), saved1.getPrice());
+    }
+
+    @Test
+    void shouldProduceSameResultWithAndThenAndCompose() {
+        Product saved1 = new Product(
+                1L,
+                "Mouse",
+                new BigDecimal("100"),
+                0
+        );
+
+        products.add(saved1);
+
+        BigDecimal multiplier = new BigDecimal("0.90");
+        Function<Product, BigDecimal> applyDiscount = product ->
+                product.getPrice().multiply(multiplier);
+
+        Function<BigDecimal, String> formatPrice = price ->
+                price.setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString() + " RUB";
+
+        Function<Product, String> pipeline1 = applyDiscount.andThen(formatPrice);
+        List<String> result1 = productUtils.transformProducts(products, pipeline1);
+
+        Function<Product, String> pipeline2 = formatPrice.compose(applyDiscount);
+        List<String> result2 = productUtils.transformProducts(products, pipeline2);
+
+        assertEquals(result1, result2);
+        assertEquals(List.of("90.00 RUB"), result1);
+        assertEquals(new BigDecimal("100"), saved1.getPrice());
     }
 }

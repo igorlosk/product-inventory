@@ -2,8 +2,10 @@ import model.Product;
 import service.ProductUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class Test {
     public static void main(String[] args) {
@@ -29,7 +31,26 @@ public class Test {
 
         ProductUtils productUtils = new ProductUtils();
 
-        
+        Function<Product, BigDecimal> getPrice = product -> product.getPrice();
+
+        BigDecimal multiplier = new BigDecimal("0.90");
+        Function<BigDecimal, BigDecimal> applyDiscount = price -> price.multiply(multiplier);
+
+        Function<BigDecimal, String> formatPrice = price ->
+                price.setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString() + " RUB";
+
+        Function<Product, String> pipeline1 = getPrice.andThen(applyDiscount).andThen(formatPrice);
+
+        List<String> print1 = productUtils.transformProducts(products, pipeline1);
+        System.out.println("Первая цепочка:");
+        print1.forEach(System.out::println);
+
+        Function<Product, String> pipeline2 = applyDiscount.compose(getPrice).andThen(formatPrice);
+
+        List<String> print2 = productUtils.transformProducts(products, pipeline2);
+        System.out.println("\nВторая цепочка:");
+        print2.forEach(System.out::println);
 
     }
 }
